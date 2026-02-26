@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human-Like Memory AI Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #1e1b4b 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div id="app" class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-4">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Human-Like Memory Agent</h1>
+                        <p class="text-purple-300 text-sm">Advanced memory system with personality</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleMemory()" class="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
+                    <button onclick="clearMemories()" class="p-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="apiKeySection" class="bg-purple-600/20 border border-purple-400/30 rounded-lg p-4">
+                <label class="block text-purple-200 text-sm mb-2">OpenAI API Key (stored locally only)</label>
+                <div class="flex gap-2">
+                    <input type="password" id="apiKey" placeholder="sk-..." class="flex-1 p-3 rounded-lg bg-white/10 border border-purple-400/30 text-white placeholder-purple-300/50">
+                    <button onclick="saveApiKey()" class="px-4 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-semibold transition">
+                        Save
+                    </button>
+                </div>
+            </div>
+            <div id="apiKeySuccess" class="bg-green-600/20 border border-green-400/30 rounded-lg p-3 flex justify-between items-center text-green-200 text-sm hidden">
+                <span>✓ API Key configured - Backend server running!</span>
+                <button onclick="changeApiKey()" class="px-3 py-1 bg-green-700 hover:bg-green-800 rounded text-white text-xs transition">
+                    Change Key
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Chat Section -->
+            <div class="lg:col-span-2">
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6 h-[600px] flex flex-col">
+                    <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 mb-4">
+                        <div class="text-center text-purple-300 py-12">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            <p>Start a conversation with Alex</p>
+                            <p class="text-sm mt-2">The agent will remember important details and develop opinions</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="messageInput" placeholder="Message the agent..." class="flex-1 p-4 rounded-xl bg-white/10 border border-purple-400/30 text-white placeholder-purple-300/50" onkeypress="handleKeyPress(event)">
+                        <button onclick="sendMessage()" id="sendBtn" class="px-6 py-4 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 rounded-xl text-white font-semibold transition">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Section -->
+            <div id="memorySection" class="lg:col-span-1 hidden">
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-6">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Memory Systems
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="text-purple-300 font-semibold mb-2">⚡ Short-Term <span id="shortTermCount">(0/5)</span></h4>
+                            <div id="shortTermMemories" class="space-y-2 text-sm"></div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-purple-300 font-semibold mb-2">💜 Long-Term <span id="longTermCount">(0/10)</span></h4>
+                            <div id="longTermMemories" class="space-y-2 text-sm"></div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-purple-300 font-semibold mb-2">💬 Episodic <span id="episodicCount">(0/15)</span></h4>
+                            <div id="episodicMemories" class="space-y-2 text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let apiKey = localStorage.getItem('openai_api_key') || '';
+        let memories = {
+            shortTerm: [],
+            longTerm: [],
+            episodic: []
+        };
+        let agentPersonality = {
+            name: 'Alex',
+            traits: ['curious', 'empathetic', 'thoughtful']
+        };
+
+        // Initialize
+        if (apiKey) {
+            document.getElementById('apiKey').value = apiKey;
+            document.getElementById('apiKeySection').classList.add('hidden');
+            document.getElementById('apiKeySuccess').classList.remove('hidden');
+        }
+
+        function saveApiKey() {
+            apiKey = document.getElementById('apiKey').value.trim();
+            if (apiKey) {
+                localStorage.setItem('openai_api_key', apiKey);
+                document.getElementById('apiKeySection').classList.add('hidden');
+                document.getElementById('apiKeySuccess').classList.remove('hidden');
+            }
+        }
+
+        function changeApiKey() {
+            document.getElementById('apiKeySection').classList.remove('hidden');
+            document.getElementById('apiKeySuccess').classList.add('hidden');
+            document.getElementById('apiKey').value = apiKey;
+            document.getElementById('apiKey').focus();
+        }
+
+        function toggleMemory() {
+            const section = document.getElementById('memorySection');
+            section.classList.toggle('hidden');
+        }
+
+        function clearMemories() {
+            if (confirm('Clear all memories and conversation history?')) {
+                memories = { shortTerm: [], longTerm: [], episodic: [] };
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="text-center text-purple-300 py-12">
+                        <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <p>Start a conversation with Alex</p>
+                        <p class="text-sm mt-2">The agent will remember important details and develop opinions</p>
+                    </div>
+                `;
+                updateMemoryDisplay();
+            }
+        }
+
+        function analyzeMemoryImportance(content) {
+            const emotionalWords = ['love', 'hate', 'amazing', 'terrible', 'excited', 'sad', 'happy', 'angry'];
+            const hasEmotion = emotionalWords.some(word => content.toLowerCase().includes(word));
+            const isPersonal = ['i am', 'my name', 'i like', 'i love', 'i hate'].some(phrase => 
+                content.toLowerCase().includes(phrase)
+            );
+            
+            let importance = 0.3;
+            if (hasEmotion) importance += 0.3;
+            if (isPersonal) importance += 0.4;
+            if (content.includes('?')) importance += 0.1;
+            
+            return Math.min(importance, 1.0);
+        }
+
+        function updateMemories(userMsg, aiResponse) {
+            const importance = analyzeMemoryImportance(userMsg);
+            const timestamp = new Date().toISOString();
+            
+            const newMemory = {
+                id: Date.now(),
+                user: userMsg,
+                agent: aiResponse,
+                importance,
+                timestamp
+            };
+
+            memories.shortTerm.push(newMemory);
+            memories.shortTerm = memories.shortTerm.slice(-5);
+            
+            if (importance > 0.6) {
+                memories.longTerm.push(newMemory);
+                memories.longTerm.sort((a, b) => b.importance - a.importance);
+                memories.longTerm = memories.longTerm.slice(0, 10);
+            }
+            
+            if (importance > 0.5 || userMsg.toLowerCase().includes('remember')) {
+                memories.episodic.push(newMemory);
+                memories.episodic = memories.episodic.slice(-15);
+            }
+
+            updateMemoryDisplay();
+        }
+
+        function updateMemoryDisplay() {
+            document.getElementById('shortTermCount').textContent = `(${memories.shortTerm.length}/5)`;
+            document.getElementById('longTermCount').textContent = `(${memories.longTerm.length}/10)`;
+            document.getElementById('episodicCount').textContent = `(${memories.episodic.length}/15)`;
+
+            document.getElementById('shortTermMemories').innerHTML = memories.shortTerm
+                .map(m => `<div class="bg-white/5 p-2 rounded text-purple-200">"${m.user.slice(0, 50)}..."</div>`)
+                .join('');
+
+            document.getElementById('longTermMemories').innerHTML = memories.longTerm
+                .map(m => `<div class="bg-purple-600/20 p-2 rounded text-purple-200">
+                    <div class="text-xs text-purple-400 mb-1">Importance: ${(m.importance * 100).toFixed(0)}%</div>
+                    "${m.user.slice(0, 40)}..."
+                </div>`)
+                .join('');
+
+            document.getElementById('episodicMemories').innerHTML = memories.episodic.slice(-5)
+                .map(m => `<div class="bg-white/5 p-2 rounded text-purple-200">"${m.user.slice(0, 40)}..."</div>`)
+                .join('');
+        }
+
+        function buildMemoryContext() {
+            let context = `You are ${agentPersonality.name}, an AI with human-like memory and personality.\n`;
+            context += `Your traits: ${agentPersonality.traits.join(', ')}.\n\n`;
+            
+            if (memories.longTerm.length > 0) {
+                context += "Important memories I retain:\n";
+                memories.longTerm.forEach(mem => {
+                    context += `- User said: "${mem.user}"\n`;
+                });
+                context += "\n";
+            }
+            
+            if (memories.shortTerm.length > 0) {
+                context += "Recent conversation:\n";
+                memories.shortTerm.forEach(mem => {
+                    context += `User: ${mem.user}\nYou: ${mem.agent}\n`;
+                });
+                context += "\n";
+            }
+            
+            context += "Remember: Form opinions, reference past conversations, show personality, and evolve based on our interactions. Be concise but thoughtful.";
+            
+            return context;
+        }
+
+        function addMessage(role, content) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages.querySelector('.text-center')) {
+                chatMessages.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            messageDiv.innerHTML = `
+                <div class="max-w-[80%] p-4 rounded-2xl ${
+                    role === 'user' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-white/20 text-white'
+                }">
+                    ${content}
+                </div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showLoading() {
+            const chatMessages = document.getElementById('chatMessages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading';
+            loadingDiv.className = 'flex justify-start';
+            loadingDiv.innerHTML = `
+                <div class="bg-white/20 text-white p-4 rounded-2xl">
+                    <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeLoading() {
+            const loading = document.getElementById('loading');
+            if (loading) loading.remove();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const userMessage = input.value.trim();
+            
+            if (!userMessage || !apiKey) return;
+
+            input.value = '';
+            addMessage('user', userMessage);
+            showLoading();
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const memoryContext = buildMemoryContext();
+                
+                // Call our backend instead of OpenAI directly
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        apiKey: apiKey,
+                        messages: [
+                            { role: 'system', content: memoryContext },
+                            { role: 'user', content: userMessage }
+                        ]
+                    })
+                });
+
+                removeLoading();
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                
+                addMessage('assistant', aiResponse);
+                updateMemories(userMessage, aiResponse);
+
+            } catch (error) {
+                removeLoading();
+                addMessage('assistant', `Error: ${error.message}`);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
